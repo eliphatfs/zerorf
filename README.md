@@ -1,5 +1,8 @@
 # ZeroRF: Sparse View 360° Reconstruction with Zero Pretraining
 
+[\[Project Page\]](https://sarahweiii.github.io/zerorf/)
+[\[Paper\]](#)
+
 ## Requirements
 
 As the code is based on [the SSDNeRF codebase](https://github.com/Lakonik/SSDNeRF), the requirements are the same. Additionally, we provide a docker image for ease of use.
