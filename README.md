@@ -1,7 +1,7 @@
 # ZeroRF: Sparse View 360° Reconstruction with Zero Pretraining
 
 [\[Project Page\]](https://sarahweiii.github.io/zerorf/)
-[\[Paper\]](#)
+[\[Paper\]](http://arxiv.org/abs/2312.09249)
 
 ## Requirements
 
