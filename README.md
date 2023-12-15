@@ -66,3 +66,33 @@ cd ../../..
 ```
 
 ## Running
+
+Execute `zerorf.py` to run ZeroRF.
+
+**Zero123++ Image**
+
+ZeroRF can be used to perform reconstruction on generated multi-view images to perform 3D content generation.
+You need to prepare a segmented RGBA image in Zero123++ format (see https://github.com/SUDO-AI-3D/zero123plus).
+An example can be found at `examples/ice.png`.
+
+```bash
+python zerorf.py --load-image=examples/ice.png
+```
+
+The default setup requires 10GB VRAM to operate.
+
+**NeRF-Synthetic**
+
+To run general reconstruction, you can prepare the dataset in NeRF-Synthetic format.
+The NeRF-Synthetic dataset itself can be obtained [here](https://drive.google.com/drive/folders/1JDdLGDruGNXWnM1eqY1FNL9PlStjaKWi).
+
+```bash
+python zerorf.py --rep=tensorf --data-dir=path/to/nerf_synthetic --obj=hotdog --n-views=6
+```
+
+The default setup requires about 16GB VRAM to operate depending on the object.
+You may want to adjust the `--n-rays-up` parameter to a lower value so it fits your VRAM (convergence could take more steps and longer time).
+
+**Configuration**
+
+You can find more configurations in `opt.py`.

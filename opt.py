@@ -20,15 +20,18 @@ def config_parser(cmd=None):
     
     # model
     parser.add_argument("--model-res", type=int, 
-                        default=20, help='model resolution')
+                        default=20, help='noise resolution (should be about 1/40 the provided image resolution), ignored when load-image is set')
     parser.add_argument("--model-ch", type=int, 
-                        default=8, help='model channel')
-    parser.add_argument("--n-rays", type=int, 
-                        default=2**12, help='number of rays per batch')
-    parser.add_argument("--learn-bg", type=bool, 
-                        default=False, help='if learn background')
+                        default=8, help='noise channel')
+    parser.add_argument("--n-rays-init", type=int, 
+                        default=2**12, help='number of rays per batch initially')
+    parser.add_argument("--n-rays-up", type=int, 
+                        default=2**16, help='number of rays per batch after 100 iterations')
+    parser.add_argument("--learn-bg", action='store_true', help='if learn background')
     parser.add_argument("--bg-color", type=float, 
                         default=1.0, help='background color')
+    parser.add_argument("--rep", type=str, choices=['dif', 'tensorf'],
+                        default="dif", help="representation to use")
     
     # training
     parser.add_argument("--net-lr", type=float, 

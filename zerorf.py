@@ -170,7 +170,7 @@ nerf: MultiSceneNeRF = build_model(dict(
     code_activation=dict(type='IdentityCode'),
     grid_size=64,
     patch_size=32,
-    decoder=decoder_2,
+    decoder=decoder_2 if args.rep == 'dif' else decoder_1,
     decoder_use_ema=False,
     bg_color=1.0,
     pixel_loss=dict(
@@ -185,8 +185,8 @@ nerf: MultiSceneNeRF = build_model(dict(
     dt_gamma_scale=0.5,
     density_thresh=0.05,
     extra_scene_step=0,
-    n_inverse_rays=args.n_rays,
-    n_decoder_rays=args.n_rays,
+    n_inverse_rays=args.n_rays_init,
+    n_decoder_rays=args.n_rays_init,
     loss_coef=0.1 / (pic_h * pic_w),
     optimizer=dict(type='Adam', lr=0, weight_decay=0.),
     lr_scheduler=dict(type='ExponentialLR', gamma=0.99),
@@ -200,7 +200,7 @@ test_cfg = dict(
     density_thresh=0.01,
     max_render_rays=pic_h * pic_w,
     dt_gamma_scale=0.5,
-    n_inverse_rays=args.n_rays,
+    n_inverse_rays=args.n_rays_init,
     loss_coef=0.1 / (pic_h * pic_w),
     n_inverse_steps=400,
     optimizer=dict(type='Adam', lr=0.0, weight_decay=0.),
@@ -231,11 +231,11 @@ for j in prog:
     prog.set_postfix(**lv)
     wandb.log(dict(train=lv))
     if j == 50:
-        nerf.train_cfg['n_inverse_rays'] = 2 ** 14
-        nerf.train_cfg['n_decoder_rays'] = 2 ** 14
+        nerf.train_cfg['n_inverse_rays'] = round((args.n_rays_init * args.n_rays_up) ** 0.5)
+        nerf.train_cfg['n_decoder_rays'] = round((args.n_rays_init * args.n_rays_up) ** 0.5)
     if j == 100:
-        nerf.train_cfg['n_inverse_rays'] = 2 ** 16 if args.load_image else 2 ** 17
-        nerf.train_cfg['n_decoder_rays'] = 2 ** 16 if args.load_image else 2 ** 17
+        nerf.train_cfg['n_inverse_rays'] = args.n_rays_up
+        nerf.train_cfg['n_decoder_rays'] = args.n_rays_up
     if j % args.val_iter == args.val_iter - 1:
         cam = OrbitCamera('final', pic_w, pic_h, 3.2, 48)
         cache = nerf.cache[0]
