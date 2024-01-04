@@ -17,6 +17,7 @@ from mmgen.models import build_model, build_module
 from lib.core.optimizer import build_optimizers
 from lib.core.ssdnerf_gui import OrbitCamera
 from lib.datasets.nerf_synthetic import NerfSynthetic
+from lib.datasets.oppo import OppoDataset
 from PIL import Image
 import einops
 from opt import config_parser
@@ -61,22 +62,34 @@ if args.load_image:
     focal_length = y / numpy.tan(meta['fovy'] / 2)
     intrinsics = numpy.array([[focal_length, focal_length, x, y]] * args.n_views)
 
-model_scale = dict(chair=2.1, drums=2.3, ficus=2.3, hotdog=3.0, lego=2.4, materials=2.4, mic=2.5, ship=2.75)
-world_scale = 2 / model_scale[args.obj]
-
-
 work_dir = "results/%s" % args.proj_name
 os.makedirs(work_dir, exist_ok=True)
 os.chdir(work_dir)
 
 if not args.load_image:
-    dataset = NerfSynthetic([f"{args.data_dir}/{args.obj}/transforms_train.json"], rgba=True, world_scale=world_scale)
-    val = NerfSynthetic([f"{args.data_dir}/{args.obj}/transforms_val.json"], world_scale=world_scale)
-    test = NerfSynthetic([f"{args.data_dir}/{args.obj}/transforms_test.json"], world_scale=world_scale)
-    
+    if args.dataset == "nerf_syn":
+        model_scale = dict(chair=2.1, drums=2.3, ficus=2.3, hotdog=3.0, lego=2.4, materials=2.4, mic=2.5, ship=2.75)
+        world_scale = 2 / model_scale[args.obj]
+        dataset = NerfSynthetic([f"{args.data_dir}/{args.obj}/transforms_train.json"], rgba=True, world_scale=world_scale)
+        val = NerfSynthetic([f"{args.data_dir}/{args.obj}/transforms_val.json"], world_scale=world_scale)
+        test = NerfSynthetic([f"{args.data_dir}/{args.obj}/transforms_test.json"], world_scale=world_scale)
+        
+        entry = dataset[0]
+        selected_idxs = kmeans_downsample(entry['cond_poses'][..., :3, 3], args.n_views)
+    elif args.dataset == "oi":
+        world_scale = 5.0
+        dataset = OppoDataset(f"{args.data_dir}/{args.obj}/output", split='train', world_scale=world_scale, rgba=True)
+        val = OppoDataset(f"{args.data_dir}/{args.obj}/output", split='test', world_scale=world_scale)
+        test = OppoDataset(f"{args.data_dir}/{args.obj}/output", split='test', world_scale=world_scale) 
 
-    entry = dataset[0]
-    selected_idxs = kmeans_downsample(entry['cond_poses'][..., :3, 3], args.n_views)
+        entry = dataset[0]
+        if args.n_views == 6:
+            selected_idxs = [10, 3, 19, 22, 17, 35]
+        elif args.n_views == 4:
+            selected_idxs = [10, 33, 35, 6]
+        else:
+            selected_idxs = kmeans_downsample(entry['cond_poses'][..., :3, 3], args.n_views)
+    
     data_entry = dict(
         cond_imgs=torch.tensor(entry['cond_imgs'][selected_idxs][None]).float().to(device),
         cond_poses=torch.tensor(entry['cond_poses'])[selected_idxs][None].float().to(device),
@@ -263,6 +276,9 @@ for j in prog:
                 for i in tqdm.trange(60, desc='%.2f' % best_psnr):
                     test_pose = cam.pose
                     test_intrinsic = cam.intrinsics
+                    if args.dataset == "oi":
+                        revert_y = numpy.array([[1, 0, 0, 0], [0, -1, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
+                        test_pose = test_pose @ revert_y
                     test_time = i / 60 * 2 - 1
                     render_result = nerf.render(
                         nerf.decoder,
@@ -274,7 +290,10 @@ for j in prog:
                         None,
                         nerf.test_cfg
                     )
-                    cam.orbit(60, numpy.sin(i / 60 * numpy.pi * 2) * 24)
+                    if args.dataset == "oi":
+                        cam.orbit(60, -numpy.sin(i / 60 * numpy.pi * 2) * 24)
+                    else:
+                        cam.orbit(60, numpy.sin(i / 60 * numpy.pi * 2) * 24)
                     frame = render_result[0].squeeze().float().cpu()
                     if not numpy.isfinite(frame).all():
                         print("Non-finite value!")

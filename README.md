@@ -90,7 +90,16 @@ To run general reconstruction, you can prepare the dataset in NeRF-Synthetic for
 The NeRF-Synthetic dataset itself can be obtained [here](https://drive.google.com/drive/folders/1JDdLGDruGNXWnM1eqY1FNL9PlStjaKWi).
 
 ```bash
-python zerorf.py --rep=tensorf --data-dir=path/to/nerf_synthetic --obj=hotdog --n-views=6
+python zerorf.py --rep=tensorf --data-dir=path/to/nerf_synthetic --obj=hotdog --n-views=6 --dataset=nerf_syn
+```
+
+**Open-Illumination**
+
+The dataset can be obtained [here](https://oppo-us-research.github.io/OpenIllumination/). 
+We use the camera aligned with axes ([train_split](https://huggingface.co/datasets/OpenIllumination/OpenIllumination/raw/main/others/transforms_alignz_train.json), [test_split](https://huggingface.co/datasets/OpenIllumination/OpenIllumination/raw/main/others/transforms_alignz_train.json)), please put the two files under `path/to/open_illumination/lighting_patterns`.
+
+```bash
+python zerorf.py --rep=tensorf --data-dir=path/to/open_illumination/lighting_patterns --obj=obj_04_stone --n-views=6 --dataset=oi
 ```
 
 The default setup requires about 16GB VRAM to operate depending on the object.

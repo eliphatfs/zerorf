@@ -11,6 +11,8 @@ def config_parser(cmd=None):
                         default="zerorf", help='wandb project name')
     
     # data
+    parser.add_argument("--dataset", type=str, 
+                        default="nerf_syn", help='type of dataset')
     parser.add_argument("--data-dir", type=str, 
                         default="/root/nerf_synthetic", help='directory of the dataset')
     parser.add_argument("--obj", type=str, 
