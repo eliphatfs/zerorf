@@ -149,7 +149,7 @@ decoder_1 = dict(
     image_h=pic_h,
     image_w=pic_w,
     has_time_dynamics=False,
-    visualize_mesh=True
+    visualize_mesh=False
 )
 decoder_2 = dict(
     type='FreqFactorizedDecoder',
@@ -169,7 +169,7 @@ decoder_2 = dict(
     image_w=pic_w,
     has_time_dynamics=False,
     freq_bands=[None, 0.4],
-    visualize_mesh=True
+    visualize_mesh=False
 )
 
 patch_reg_loss = build_module(dict(
