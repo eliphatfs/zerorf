@@ -1,4 +1,4 @@
-# ZeroRF: Sparse View 360° Reconstruction with Zero Pretraining
+# ZeroRF: Sparse View 360° Reconstruction with Zero Pretraining [CVPR 2024]
 
 [\[Project Page\]](https://sarahweiii.github.io/zerorf/)
 [\[Paper\]](http://arxiv.org/abs/2312.09249)
